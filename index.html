@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Türkçe">
+<meta name="theme-color" content="#e9f5f3">
+<title>Türkçe</title>
+<style>
+  :root{
+    --ink:#1b2430; --muted:#6a7686; --accent:#0e9c91; --accent-d:#0b7d74; --accent2:#ff6b5a; --violet:#7b6cf0;
+    --card:rgba(255,255,255,.6); --card-solid:#ffffff; --line:rgba(255,255,255,.85); --hair:rgba(120,130,150,.16);
+    --blur:blur(18px) saturate(1.5); --r:20px; --r-sm:14px;
+    --good:#0e9c74; --bad:#d5473b; --gold:#e3a63b;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif; color:var(--ink);
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+    background:linear-gradient(165deg,#e6f6f3 0%,#ece8f8 52%,#fdeeea 100%) fixed;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 40px}
+
+  /* header */
+  .app-head{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);
+    background:rgba(255,255,255,.5);border-bottom:1px solid var(--hair)}
+  .app-head .inner{max-width:480px;margin:0 auto;padding:calc(10px + var(--safe-t)) 16px 10px;display:flex;align-items:center;justify-content:space-between}
+  .logo{font-size:21px;font-weight:760;letter-spacing:-.4px}
+  .logo i{font-style:normal;color:var(--accent)}
+  .hbtn{display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer;font:inherit;font-size:12.5px;font-weight:650;
+    padding:8px 13px;border-radius:12px;color:var(--ink);background:rgba(255,255,255,.7);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .hbtn:active{transform:scale(.96)}
+  svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .hbtn svg{width:15px;height:15px}
+
+  .view{display:none;animation:fade .28s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .pt{padding-top:18px}
+
+  h1.t{font-size:24px;font-weight:760;letter-spacing:-.5px;margin:18px 2px 2px}
+  .sub{font-size:13.5px;color:var(--muted);margin:0 2px 18px}
+
+  .glass{background:var(--card);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:0 8px 26px rgba(70,80,110,.08)}
+  .pad{padding:15px}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .kpi{padding:14px 8px;text-align:center}
+  .kpi .n{font-size:24px;font-weight:780;line-height:1;background:linear-gradient(120deg,var(--accent),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .kpi.hot .n{background:linear-gradient(120deg,#ff8a63,#ff5e8a);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .kpi .l{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.2px}
+
+  .panel{margin-bottom:16px}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .panel-h .pt2{font-size:13px;font-weight:700}
+  .seg{display:inline-flex;background:rgba(255,255,255,.5);border-radius:9px;padding:2.5px;border:1px solid var(--line)}
+  .seg button{border:none;background:none;font:inherit;font-size:11.5px;font-weight:650;color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer}
+  .seg button.on{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+  .chart{display:flex;align-items:flex-end;gap:6px;height:104px;padding-top:6px}
+  .barcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%}
+  .bwrap{flex:1;width:100%;display:flex;align-items:flex-end}
+  .bar{width:62%;margin:0 auto;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#3ec7ba,#7b6cf0);min-height:3px;transition:height .5s cubic-bezier(.2,.8,.2,1)}
+  .bar.today{background:linear-gradient(180deg,#ff8a63,#ff5e8a)}
+  .bval{font-size:9.5px;color:var(--accent-d);font-weight:700;height:12px}
+  .blab{font-size:9.5px;color:var(--muted)}
+
+  .mastery{display:flex;gap:7px}
+  .tile{flex:1;text-align:center}
+  .tbar{height:36px;border-radius:8px;background:rgba(255,255,255,.55);overflow:hidden;display:flex;align-items:flex-end;border:1px solid var(--line)}
+  .tbar>span{display:block;width:100%;background:linear-gradient(180deg,#25c2b4,#0e9c91)}
+  .tn{font-size:12px;font-weight:700;margin-top:5px}
+  .tl{font-size:8.5px;color:var(--muted)}
+  .hint{font-size:11px;color:var(--muted);margin-top:12px;text-align:center}
+
+  .actions{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .btn{border:none;cursor:pointer;font:inherit;font-size:15px;font-weight:680;padding:15px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+  .btn svg{width:17px;height:17px}
+  .btn:active{opacity:.9;transform:scale(.99)}
+  .btn-main{background:linear-gradient(180deg,#14b3a5,#0c9086);color:#fff;box-shadow:0 8px 20px rgba(14,156,145,.38)}
+  .btn-sec{background:rgba(255,255,255,.6);color:var(--ink);border:1px solid var(--line)}
+  .btn-coral{background:linear-gradient(180deg,#ff7a5f,#f2543a);color:#fff;box-shadow:0 8px 20px rgba(242,84,58,.32)}
+  .btn-ghost{background:rgba(255,255,255,.5);color:var(--accent-d);border:1px solid var(--line)}
+
+  /* training menu */
+  .sec-title{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:22px 2px 11px}
+  .glist{display:flex;flex-direction:column;gap:11px}
+  .gcard{display:flex;align-items:center;gap:14px;padding:15px;cursor:pointer;transition:transform .14s}
+  .gcard:active{transform:scale(.985)}
+  .gico{width:48px;height:48px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(255,255,255,.72)}
+  .gn{font-size:16px;font-weight:700}
+  .gs{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .gchev{margin-left:auto;color:var(--muted);opacity:.55}
+  .gchev svg{width:16px;height:16px;stroke-width:2.2}
+  .gcard.feature{background:linear-gradient(120deg,rgba(123,108,240,.16),rgba(255,107,90,.13));border:1px solid rgba(123,108,240,.3)}
+  .gcard.feature .gico{background:rgba(255,255,255,.85)}
+
+  /* revision categories */
+  .catgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .catcard{display:flex;align-items:center;gap:11px;padding:14px 13px;cursor:pointer;transition:transform .14s}
+  .catcard:active{transform:scale(.97)}
+  .catico{width:40px;height:40px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;background:rgba(255,255,255,.72)}
+  .catname{font-size:14px;font-weight:680;line-height:1.15}
+  .catcount{font-size:11px;color:var(--muted);margin-top:1px}
+
+  /* revision word list */
+  .back{display:inline-flex;align-items:center;gap:6px;border:none;background:none;cursor:pointer;font:inherit;font-size:14px;font-weight:650;color:var(--accent-d);padding:6px 0;margin-top:8px}
+  .back svg{width:16px;height:16px;stroke-width:2.3}
+  .wlist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .wrow{display:flex;align-items:center;gap:12px;padding:13px 15px}
+  .wrow .a{font-size:16px;font-weight:680;flex:1}
+  .wrow .b{font-size:14px;color:var(--muted);flex:1;text-align:right}
+  .wrow.rev .a{color:var(--muted);font-weight:500;font-size:14px}
+  .wrow.rev .b{color:var(--ink);font-weight:680;font-size:16px;text-align:right}
+
+  /* game stage */
+  .stage-top{display:flex;align-items:center;gap:12px;padding-top:16px;margin-bottom:10px}
+  .stage-top .close{background:rgba(255,255,255,.6);border:1px solid var(--line);width:34px;height:34px;border-radius:50%;font-size:16px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .prog{flex:1;height:8px;background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .prog>span{display:block;height:100%;background:linear-gradient(90deg,#25c2b4,#7b6cf0);width:0;transition:width .3s}
+  .prog-txt{font-size:12px;color:var(--muted);font-weight:650;min-width:42px;text-align:right}
+
+  .dir-pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:5px 11px;border-radius:20px;margin:6px 0 2px}
+  .dir-tr{background:rgba(14,156,145,.14);color:var(--accent-d)}
+  .dir-fr{background:rgba(255,107,90,.15);color:#d5473b}
+
+  .prompt{font-size:30px;font-weight:750;text-align:center;margin:26px 8px 6px;word-break:break-word;letter-spacing:-.4px}
+  .prompt small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:8px}
+  .choices{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  .choice{padding:15px 16px;font-size:16px;cursor:pointer;text-align:center;font-weight:550;transition:.12s}
+  .choice:active{transform:scale(.985)}
+  .choice.correct{background:rgba(14,156,116,.16)!important;border-color:var(--good)!important;color:var(--good);font-weight:750}
+  .choice.wrong{background:rgba(213,71,59,.14)!important;border-color:var(--bad)!important;color:var(--bad)}
+  .choice.dim{opacity:.45}
+
+  .flash{perspective:1200px;margin:18px 0}
+  .flash-in{position:relative;width:100%;min-height:230px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flash.flip .flash-in{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+  .face .big{font-size:32px;font-weight:750;letter-spacing:-.4px}
+  .face .lab{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px}
+  .face.back{transform:rotateY(180deg)}
+  .selfeval{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+  .mcard{padding:16px 8px;text-align:center;font-size:15px;font-weight:600;cursor:pointer;min-height:60px;display:flex;align-items:center;justify-content:center;transition:.14s}
+  .mcard.tr{color:var(--accent-d)}
+  .mcard.sel{border-color:var(--gold)!important;background:rgba(227,166,59,.14)!important}
+  .mcard.done{opacity:0;pointer-events:none;transform:scale(.9)}
+  .mcard.err{border-color:var(--bad)!important;background:rgba(213,71,59,.12)!important}
+
+  .order-target{min-height:66px;border:1.5px dashed var(--line);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;margin:16px 0;background:rgba(255,255,255,.4)}
+  .order-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .word{border:1px solid var(--line);border-radius:11px;padding:10px 14px;font-size:15px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.7)}
+  .word:active{transform:scale(.96)}
+  .word.placed{background:rgba(14,156,145,.14);border-color:var(--accent)}
+
+  .speaker{width:100px;height:100px;border-radius:50%;background:linear-gradient(180deg,#14b3a5,#0c9086);color:#fff;border:none;font-size:42px;margin:14px auto 6px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 26px rgba(14,156,145,.4)}
+  .speaker:active{transform:scale(.95)}
+  .note{background:rgba(227,166,59,.13);border:1px solid rgba(227,166,59,.35);border-radius:13px;padding:11px 13px;font-size:12.5px;color:#8a6d2f;margin:14px 0}
+
+  .fb{position:fixed;left:16px;right:16px;bottom:calc(20px + var(--safe-b));max-width:448px;margin:0 auto;padding:14px 16px;border-radius:16px;text-align:center;font-weight:750;color:#fff;transform:translateY(160%);transition:transform .28s cubic-bezier(.2,.9,.3,1);z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .fb.show{transform:none}
+  .fb.ok{background:linear-gradient(120deg,#12b39a,#0e9c74)} .fb.no{background:linear-gradient(120deg,#e8604f,#d5473b)}
+  .fb small{display:block;font-weight:400;font-size:12.5px;opacity:.92;margin-top:2px}
+
+  .result{text-align:center;padding:34px 10px}
+  .result .score{font-size:52px;font-weight:800;background:linear-gradient(120deg,var(--accent),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .result .rlab{color:var(--muted);margin:6px 0 24px;font-size:15px}
+
+  .field-lab{font-size:12px;font-weight:700;color:var(--muted);margin:0 2px 6px;text-transform:uppercase;letter-spacing:.5px}
+  textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:13px;padding:12px;font-family:ui-monospace,monospace;font-size:12px;resize:vertical;background:rgba(255,255,255,.7);color:var(--ink)}
+  .row2{display:flex;gap:10px;margin-top:10px}.row2 .btn{flex:1}
+  .msg{font-size:13px;margin-top:10px;padding:10px 12px;border-radius:11px;display:none}
+  .msg.show{display:block}
+  .msg.ok{background:rgba(14,156,116,.15);color:var(--good)} .msg.err{background:rgba(213,71,59,.13);color:var(--bad)}
+</style>
+</head>
+<body>
+
+<header class="app-head">
+  <div class="inner">
+    <div class="logo">Türk<i>çe</i></div>
+    <button class="hbtn" onclick="go('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Accueil</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HOME -->
+  <section id="v-home" class="view active">
+    <h1 class="t" id="greet">Merhaba 👋</h1>
+    <div class="sub" id="greet-sub"></div>
+    <div class="kpis">
+      <div class="kpi hot glass"><div class="n" id="s-streak">0</div><div class="l">jours 🔥</div></div>
+      <div class="kpi glass"><div class="n" id="s-today">0</div><div class="l">mots aujourd'hui</div></div>
+      <div class="kpi glass"><div class="n" id="s-acc">–</div><div class="l">précision</div></div>
+    </div>
+    <div class="panel glass pad">
+      <div class="panel-h"><span class="pt2">Activité</span>
+        <div class="seg" id="range-seg"><button class="on" data-r="week">Semaine</button><button data-r="month">Mois</button></div>
+      </div>
+      <div class="chart" id="chart"></div>
+    </div>
+    <div class="panel glass pad">
+      <div class="panel-h"><span class="pt2">Ta maîtrise</span></div>
+      <div class="mastery" id="mastery"></div>
+      <div class="hint">Boîte 1 = à apprendre · Boîte 5 = acquis. Les mots faibles reviennent plus souvent.</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-main" onclick="go('train')"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>Commencer l'entraînement</button>
+      <button class="btn btn-sec" onclick="go('save')"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Sauvegarde</button>
+    </div>
+  </section>
+
+  <!-- TRAIN MENU -->
+  <section id="v-train" class="view">
+    <h1 class="t">Choisis ton jeu</h1>
+    <div class="sub">Une manche dure 2 à 3 minutes.</div>
+    <div class="sec-title">Jeux</div>
+    <div class="glist" id="game-list"></div>
+    <div class="sec-title">Révision ciblée</div>
+    <div class="gcard feature glass" onclick="go('revcats')">
+      <div class="gico">📚</div>
+      <div><div class="gn">Révision par thème</div><div class="gs">choisis une catégorie précise à revoir</div></div>
+      <span class="gchev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+    </div>
+  </section>
+
+  <!-- STAGE -->
+  <section id="v-stage" class="view">
+    <div class="stage-top">
+      <button class="close" onclick="quitGame()">✕</button>
+      <div class="prog"><span id="prog-bar"></span></div>
+      <div class="prog-txt" id="prog-txt">0/0</div>
+    </div>
+    <div id="stage-body"></div>
+  </section>
+
+  <!-- REVISION CATEGORIES -->
+  <section id="v-revcats" class="view">
+    <button class="back" onclick="go('train')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Entraînement</button>
+    <h1 class="t">Révision par thème</h1>
+    <div class="sub">Choisis une catégorie pour voir tous ses mots.</div>
+    <div class="catgrid" id="cat-grid"></div>
+  </section>
+
+  <!-- REVISION LIST -->
+  <section id="v-revlist" class="view">
+    <button class="back" onclick="go('revcats')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Catégories</button>
+    <h1 class="t" id="rev-title">Thème</h1>
+    <div class="sub" id="rev-sub"></div>
+    <div class="seg" id="rev-dir" style="margin-bottom:4px"><button class="on" data-d="tr2fr">Turc → Français</button><button data-d="fr2tr">Français → Turc</button></div>
+    <button class="btn btn-ghost" style="margin-top:12px" id="rev-practice">S'entraîner sur ce thème</button>
+    <div class="wlist" id="rev-list"></div>
+  </section>
+
+  <!-- SAVE -->
+  <section id="v-save" class="view">
+    <h1 class="t">Sauvegarde</h1>
+    <div class="sub">Ta progression est gardée automatiquement sur ce téléphone. Exporte-la de temps en temps comme filet de sécurité.</div>
+    <div class="glass pad">
+      <div class="field-lab">Exporter</div>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 8px">Copie ce texte et garde-le (Notes, mail…). Il contient tout ton historique.</p>
+      <textarea id="export-box" readonly></textarea>
+      <div class="row2"><button class="btn btn-main" onclick="copyExport()">Copier</button><button class="btn btn-ghost" onclick="refreshExport()">Actualiser</button></div>
+      <div class="msg" id="exp-msg"></div>
+    </div>
+    <div style="height:14px"></div>
+    <div class="glass pad">
+      <div class="field-lab">Importer</div>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 8px">Colle une sauvegarde ici pour restaurer ta progression.</p>
+      <textarea id="import-box" placeholder="Colle ton JSON de sauvegarde…"></textarea>
+      <div class="row2"><button class="btn btn-coral" onclick="doImport()">Importer</button></div>
+      <div class="msg" id="imp-msg"></div>
+    </div>
+    <div style="height:14px"></div>
+    <div class="glass pad">
+      <div class="field-lab">Remise à zéro</div>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 10px">Efface toute la progression sur ce téléphone. Irréversible.</p>
+      <button class="btn btn-ghost" style="color:var(--bad)" onclick="resetAll()">Tout remettre à zéro</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="fb" id="fb"></div>
+
+<script>
+"use strict";
+/* Répertoire turc ↔ français.  [turc, français, catégorie, priorité(1=noyau,2=secondaire)] */
+const RAW = [
+  /* ===== Politesse & formules ===== */
+  ["merhaba","bonjour","Politesse",1],["selam","salut","Politesse",1],
+  ["günaydın","bonjour (le matin)","Politesse",1],["iyi günler","bonne journée","Politesse",1],
+  ["iyi akşamlar","bonsoir","Politesse",1],["iyi geceler","bonne nuit","Politesse",1],
+  ["hoşça kal","au revoir (à qui reste)","Politesse",1],["güle güle","au revoir (à qui part)","Politesse",1],
+  ["görüşürüz","à bientôt","Politesse",1],["hoş geldiniz","bienvenue","Politesse",1],
+  ["hoş bulduk","(réponse à bienvenue)","Politesse",2],["nasılsınız","comment allez-vous","Politesse",1],
+  ["nasılsın","comment vas-tu","Politesse",1],["iyiyim","je vais bien","Politesse",1],
+  ["teşekkür ederim","merci","Politesse",1],["teşekkürler","merci","Politesse",1],
+  ["sağ ol","merci (familier)","Politesse",2],["rica ederim","je vous en prie","Politesse",1],
+  ["bir şey değil","de rien","Politesse",1],["lütfen","s'il vous plaît","Politesse",1],
+  ["evet","oui","Politesse",1],["hayır","non","Politesse",1],["yok","il n'y en a pas / non","Politesse",2],
+  ["tamam","d'accord","Politesse",1],["peki","d'accord / bon","Politesse",2],
+  ["affedersiniz","excusez-moi","Politesse",1],["pardon","pardon","Politesse",1],
+  ["özür dilerim","je suis désolé","Politesse",1],["memnun oldum","enchanté","Politesse",1],
+  ["buyurun","je vous en prie (tenez)","Politesse",1],["afiyet olsun","bon appétit","Politesse",1],
+  ["elinize sağlık","merci pour le repas","Politesse",1],["kolay gelsin","bon courage","Politesse",2],
+  ["geçmiş olsun","bon rétablissement","Politesse",2],["şerefe","santé (trinquer)","Politesse",2],
+  ["inşallah","si Dieu le veut / espérons","Politesse",2],["maşallah","(admiration)","Politesse",2],
+  ["tebrikler","félicitations","Politesse",2],
+
+  /* ===== Phrases utiles ===== */
+  ["ben Fransızım","je suis français","Phrases",1],
+  ["adın ne","comment tu t'appelles","Phrases",1],
+  ["benim adım","je m'appelle","Phrases",1],
+  ["nerelisin","d'où viens-tu","Phrases",1],
+  ["türkçe bilmiyorum","je ne parle pas turc","Phrases",1],
+  ["biraz türkçe biliyorum","je parle un peu turc","Phrases",1],
+  ["anlamadım","je n'ai pas compris","Phrases",1],
+  ["anladım","j'ai compris","Phrases",1],
+  ["tekrar eder misiniz","pouvez-vous répéter","Phrases",1],
+  ["daha yavaş konuşur musunuz","pouvez-vous parler plus lentement","Phrases",1],
+  ["fransızca biliyor musunuz","parlez-vous français","Phrases",1],
+  ["bu ne demek","qu'est-ce que ça veut dire","Phrases",1],
+  ["seni seviyorum","je t'aime","Phrases",1],
+  ["seni özledim","tu me manques","Phrases",1],
+  ["çok teşekkür ederim","merci beaucoup","Phrases",1],
+  ["sorun değil","pas de problème","Phrases",1],
+  ["yardım eder misiniz","pouvez-vous m'aider","Phrases",1],
+  ["yardıma ihtiyacım var","j'ai besoin d'aide","Phrases",1],
+  ["su içmek istiyorum","je veux boire de l'eau","Phrases",1],
+  ["açım","j'ai faim","Phrases",1],["susadım","j'ai soif","Phrases",1],
+  ["aç mısın","as-tu faim","Phrases",2],
+  ["çok lezzetli","c'est délicieux","Phrases",1],
+  ["ne kadar","combien ça coûte","Phrases",1],
+  ["çok pahalı","c'est trop cher","Phrases",1],
+  ["saat kaç","quelle heure est-il","Phrases",1],
+  ["tuvalet nerede","où sont les toilettes","Phrases",1],
+  ["bu ne","qu'est-ce que c'est","Phrases",1],
+  ["nereye gidiyorsun","où vas-tu","Phrases",1],
+  ["ne yapıyorsun","qu'est-ce que tu fais","Phrases",1],
+  ["kendine iyi bak","prends soin de toi","Phrases",1],
+  ["çok güzel","c'est très beau","Phrases",1],
+  ["bugün hava güzel","il fait beau aujourd'hui","Phrases",2],
+  ["biliyorum","je sais","Phrases",1],["bilmiyorum","je ne sais pas","Phrases",1],
+  ["emin değilim","je ne suis pas sûr","Phrases",2],
+  ["tabii ki","bien sûr","Phrases",1],["haklısın","tu as raison","Phrases",2],
+  ["merak etme","ne t'inquiète pas","Phrases",1],["acele et","dépêche-toi","Phrases",2],
+  ["gel buraya","viens ici","Phrases",1],["otur lütfen","assieds-toi s'il te plaît","Phrases",1],
+  ["görüşmek üzere","à bientôt","Phrases",2],["iyi yolculuklar","bon voyage","Phrases",2],
+
+  /* ===== Famille ===== */
+  ["anne","mère","Famille",1],["baba","père","Famille",1],["anne baba","parents","Famille",1],
+  ["abla","grande sœur","Famille",1],["ağabey","grand frère","Famille",1],
+  ["kardeş","frère/sœur (cadet)","Famille",1],["erkek kardeş","frère cadet","Famille",1],
+  ["kız kardeş","sœur cadette","Famille",1],["teyze","tante (maternelle)","Famille",1],
+  ["hala","tante (paternelle)","Famille",1],["dayı","oncle (maternel)","Famille",1],
+  ["amca","oncle (paternel)","Famille",1],["dede","grand-père","Famille",1],
+  ["babaanne","grand-mère (paternelle)","Famille",1],["anneanne","grand-mère (maternelle)","Famille",1],
+  ["torun","petit-enfant","Famille",2],["eş","conjoint(e)","Famille",1],
+  ["koca","mari","Famille",1],["karı","épouse","Famille",1],["kadın","femme","Famille",1],
+  ["adam","homme","Famille",1],["erkek","homme / masculin","Famille",1],
+  ["oğul","fils","Famille",1],["kız","fille","Famille",1],["çocuk","enfant","Famille",1],
+  ["bebek","bébé","Famille",2],["aile","famille","Famille",1],["akraba","parent (proche)","Famille",2],
+  ["kuzen","cousin(e)","Famille",2],["yeğen","neveu / nièce","Famille",2],
+  ["gelin","belle-fille / mariée","Famille",2],["damat","gendre / marié","Famille",2],
+  ["kayınpeder","beau-père","Famille",2],["kayınvalide","belle-mère","Famille",2],
+  ["baldız","belle-sœur (sœur de l'épouse)","Famille",2],["görümce","belle-sœur (sœur du mari)","Famille",2],
+  ["enişte","mari de la sœur/tante","Famille",2],["yenge","femme du frère/oncle","Famille",2],
+  ["komşu","voisin","Famille",2],["arkadaş","ami","Famille",1],["misafir","invité","Famille",1],
+
+  /* ===== À table ===== */
+  ["sofra","table (repas)","À table",1],["yemek","repas / plat","À table",1],
+  ["kahvaltı","petit-déjeuner","À table",1],["öğle yemeği","déjeuner","À table",1],
+  ["akşam yemeği","dîner","À table",1],["tabak","assiette","À table",2],
+  ["çatal","fourchette","À table",2],["kaşık","cuillère","À table",2],["bıçak","couteau","À table",2],
+  ["bardak","verre","À table",1],["fincan","tasse","À table",2],["şişe","bouteille","À table",2],
+  ["peçete","serviette","À table",2],["su","eau","À table",1],["ekmek","pain","À table",1],
+  ["tuz","sel","À table",1],["şeker","sucre","À table",1],["biber","poivre / piment","À table",2],
+  ["baharat","épice","À table",2],["tatlı","dessert / sucré","À table",1],["tuzlu","salé","À table",2],
+  ["acı","épicé / amer","À table",2],["ekşi","acide","À table",2],["lezzetli","délicieux","À table",1],
+  ["hesap","addition","À table",2],["garson","serveur","À table",2],["tarif","recette","À table",2],
+
+  /* ===== Aliments & boissons ===== */
+  ["çay","thé","Aliments",1],["kahve","café","Aliments",1],["süt","lait","Aliments",1],
+  ["ayran","ayran","Aliments",2],["meyve suyu","jus de fruit","Aliments",2],
+  ["şarap","vin","Aliments",2],["bira","bière","Aliments",2],["peynir","fromage","Aliments",1],
+  ["yumurta","œuf","Aliments",1],["tereyağı","beurre","Aliments",1],["yoğurt","yaourt","Aliments",1],
+  ["et","viande","Aliments",1],["tavuk","poulet","Aliments",1],["balık","poisson","Aliments",1],
+  ["kıyma","viande hachée","Aliments",2],["sucuk","saucisson turc","Aliments",2],
+  ["pirinç","riz (cru)","Aliments",2],["bulgur","boulgour","Aliments",2],["makarna","pâtes","Aliments",1],
+  ["un","farine","Aliments",2],["mercimek","lentille","Aliments",2],["nohut","pois chiche","Aliments",2],
+  ["fasulye","haricot","Aliments",2],["patates","pomme de terre","Aliments",1],["domates","tomate","Aliments",1],
+  ["salatalık","concombre","Aliments",2],["soğan","oignon","Aliments",2],["sarımsak","ail","Aliments",2],
+  ["patlıcan","aubergine","Aliments",2],["havuç","carotte","Aliments",2],["ıspanak","épinard","Aliments",2],
+  ["maydanoz","persil","Aliments",2],["elma","pomme","Aliments",1],["armut","poire","Aliments",2],
+  ["muz","banane","Aliments",1],["portakal","orange","Aliments",1],["mandalina","mandarine","Aliments",2],
+  ["limon","citron","Aliments",1],["üzüm","raisin","Aliments",2],["çilek","fraise","Aliments",1],
+  ["karpuz","pastèque","Aliments",2],["kavun","melon","Aliments",2],["şeftali","pêche","Aliments",2],
+  ["kayısı","abricot","Aliments",2],["kiraz","cerise","Aliments",2],["incir","figue","Aliments",2],
+  ["nar","grenade","Aliments",2],["zeytin","olive","Aliments",1],["ceviz","noix","Aliments",2],
+  ["fındık","noisette","Aliments",2],["badem","amande","Aliments",2],["bal","miel","Aliments",2],
+  ["reçel","confiture","Aliments",2],["çorba","soupe","Aliments",1],["salata","salade","Aliments",1],
+  ["pilav","riz (cuit)","Aliments",1],["köfte","boulettes de viande","Aliments",1],["kebap","kebab","Aliments",1],
+  ["döner","döner","Aliments",1],["lahmacun","lahmacun","Aliments",2],["pide","pide","Aliments",2],
+  ["börek","börek","Aliments",1],["dolma","légume farci","Aliments",2],["baklava","baklava","Aliments",1],
+  ["dondurma","glace","Aliments",1],["çikolata","chocolat","Aliments",1],["kek","gâteau","Aliments",1],
+  ["meyve","fruit","Aliments",1],["sebze","légume","Aliments",1],["zeytinyağı","huile d'olive","Aliments",2],
+
+  /* ===== Sentiments & états ===== */
+  ["mutlu","heureux","Sentiments",1],["üzgün","triste","Sentiments",1],["kızgın","en colère","Sentiments",1],
+  ["sinirli","énervé","Sentiments",2],["yorgun","fatigué","Sentiments",1],["hasta","malade","Sentiments",1],
+  ["korkmuş","effrayé","Sentiments",2],["şaşkın","étonné","Sentiments",2],["heyecanlı","excité / enthousiaste","Sentiments",2],
+  ["endişeli","inquiet","Sentiments",2],["rahat","détendu","Sentiments",1],["yalnız","seul","Sentiments",1],
+  ["âşık","amoureux","Sentiments",2],["gururlu","fier","Sentiments",2],["utangaç","timide","Sentiments",2],
+  ["cesur","courageux","Sentiments",2],["sakin","calme","Sentiments",1],["sevgi","amour / affection","Sentiments",1],
+  ["aşk","amour","Sentiments",1],["korku","peur","Sentiments",2],["öfke","colère","Sentiments",2],
+  ["sevinç","joie","Sentiments",2],["özlem","le manque (de qqn)","Sentiments",2],
+
+  /* ===== Corps & santé ===== */
+  ["baş","tête","Corps & santé",1],["saç","cheveux","Corps & santé",1],["yüz","visage","Corps & santé",1],
+  ["göz","œil","Corps & santé",1],["kulak","oreille","Corps & santé",1],["burun","nez","Corps & santé",1],
+  ["ağız","bouche","Corps & santé",1],["diş","dent","Corps & santé",1],["dil","langue","Corps & santé",1],
+  ["boyun","cou","Corps & santé",2],["boğaz","gorge","Corps & santé",2],["omuz","épaule","Corps & santé",2],
+  ["kol","bras","Corps & santé",1],["el","main","Corps & santé",1],["parmak","doigt","Corps & santé",2],
+  ["karın","ventre","Corps & santé",1],["sırt","dos","Corps & santé",2],["bacak","jambe","Corps & santé",1],
+  ["diz","genou","Corps & santé",2],["ayak","pied","Corps & santé",1],["kalp","cœur","Corps & santé",1],
+  ["kan","sang","Corps & santé",2],["kemik","os","Corps & santé",2],["cilt","peau","Corps & santé",2],
+  ["sağlık","santé","Corps & santé",1],["ağrı","douleur","Corps & santé",1],["ateş","fièvre","Corps & santé",1],
+  ["öksürük","toux","Corps & santé",2],["nezle","rhume","Corps & santé",2],["grip","grippe","Corps & santé",2],
+  ["ilaç","médicament","Corps & santé",1],["doktor","médecin","Corps & santé",1],["hastane","hôpital","Corps & santé",1],
+  ["eczane","pharmacie","Corps & santé",1],["hemşire","infirmier","Corps & santé",2],["yaralı","blessé","Corps & santé",2],
+
+  /* ===== Maison & objets ===== */
+  ["ev","maison","Maison & objets",1],["oda","chambre / pièce","Maison & objets",1],["salon","salon","Maison & objets",1],
+  ["mutfak","cuisine","Maison & objets",1],["banyo","salle de bain","Maison & objets",1],["tuvalet","toilettes","Maison & objets",1],
+  ["kapı","porte","Maison & objets",1],["pencere","fenêtre","Maison & objets",1],["duvar","mur","Maison & objets",2],
+  ["çatı","toit","Maison & objets",2],["merdiven","escalier","Maison & objets",2],["bahçe","jardin","Maison & objets",1],
+  ["balkon","balcon","Maison & objets",2],["masa","table","Maison & objets",1],["sandalye","chaise","Maison & objets",1],
+  ["koltuk","fauteuil / canapé","Maison & objets",2],["yatak","lit","Maison & objets",1],["dolap","armoire","Maison & objets",2],
+  ["raf","étagère","Maison & objets",2],["ayna","miroir","Maison & objets",2],["lamba","lampe","Maison & objets",2],
+  ["halı","tapis","Maison & objets",2],["perde","rideau","Maison & objets",2],["yastık","oreiller","Maison & objets",2],
+  ["battaniye","couverture","Maison & objets",2],["havlu","serviette","Maison & objets",2],["sabun","savon","Maison & objets",2],
+  ["buzdolabı","réfrigérateur","Maison & objets",1],["fırın","four","Maison & objets",2],["televizyon","télévision","Maison & objets",1],
+  ["telefon","téléphone","Maison & objets",1],["bilgisayar","ordinateur","Maison & objets",1],["anahtar","clé","Maison & objets",1],
+  ["saat","horloge / montre","Maison & objets",1],["kitap","livre","Maison & objets",1],["kalem","stylo","Maison & objets",1],
+  ["kağıt","papier","Maison & objets",2],["çanta","sac","Maison & objets",1],["cüzdan","portefeuille","Maison & objets",2],
+  ["gözlük","lunettes","Maison & objets",2],["şemsiye","parapluie","Maison & objets",2],
+
+  /* ===== Vêtements ===== */
+  ["giysi","vêtement","Vêtements",1],["elbise","robe","Vêtements",1],["gömlek","chemise","Vêtements",1],
+  ["tişört","t-shirt","Vêtements",1],["pantolon","pantalon","Vêtements",1],["etek","jupe","Vêtements",2],
+  ["ceket","veste","Vêtements",1],["mont","manteau","Vêtements",1],["kazak","pull","Vêtements",1],
+  ["şort","short","Vêtements",2],["çorap","chaussette","Vêtements",1],["ayakkabı","chaussure","Vêtements",1],
+  ["bot","botte","Vêtements",2],["terlik","pantoufle","Vêtements",2],["şapka","chapeau","Vêtements",1],
+  ["eldiven","gant","Vêtements",2],["atkı","écharpe","Vêtements",2],["kemer","ceinture","Vêtements",2],
+  ["kravat","cravate","Vêtements",2],["mayo","maillot de bain","Vêtements",2],["düğme","bouton","Vêtements",2],
+
+  /* ===== Temps & calendrier ===== */
+  ["gün","jour","Temps & calendrier",1],["hafta","semaine","Temps & calendrier",1],["ay","mois / lune","Temps & calendrier",1],
+  ["yıl","an / année","Temps & calendrier",1],["saat","heure","Temps & calendrier",1],["dakika","minute","Temps & calendrier",1],
+  ["saniye","seconde","Temps & calendrier",2],["bugün","aujourd'hui","Temps & calendrier",1],["dün","hier","Temps & calendrier",1],
+  ["yarın","demain","Temps & calendrier",1],["sabah","matin","Temps & calendrier",1],["öğle","midi","Temps & calendrier",1],
+  ["akşam","soir","Temps & calendrier",1],["gece","nuit","Temps & calendrier",1],["şimdi","maintenant","Temps & calendrier",1],
+  ["sonra","après / plus tard","Temps & calendrier",1],["önce","avant","Temps & calendrier",1],["erken","tôt","Temps & calendrier",2],
+  ["geç","tard","Temps & calendrier",2],["pazartesi","lundi","Temps & calendrier",1],["salı","mardi","Temps & calendrier",1],
+  ["çarşamba","mercredi","Temps & calendrier",1],["perşembe","jeudi","Temps & calendrier",1],["cuma","vendredi","Temps & calendrier",1],
+  ["cumartesi","samedi","Temps & calendrier",1],["pazar","dimanche","Temps & calendrier",1],["ocak","janvier","Temps & calendrier",2],
+  ["şubat","février","Temps & calendrier",2],["mart","mars","Temps & calendrier",2],["nisan","avril","Temps & calendrier",2],
+  ["mayıs","mai","Temps & calendrier",2],["haziran","juin","Temps & calendrier",2],["temmuz","juillet","Temps & calendrier",2],
+  ["ağustos","août","Temps & calendrier",2],["eylül","septembre","Temps & calendrier",2],["ekim","octobre","Temps & calendrier",2],
+  ["kasım","novembre","Temps & calendrier",2],["aralık","décembre","Temps & calendrier",2],["ilkbahar","printemps","Temps & calendrier",1],
+  ["yaz","été","Temps & calendrier",1],["sonbahar","automne","Temps & calendrier",1],["kış","hiver","Temps & calendrier",1],
+  ["hafta sonu","week-end","Temps & calendrier",1],["tatil","vacances","Temps & calendrier",1],["doğum günü","anniversaire","Temps & calendrier",1],
+  ["bayram","fête","Temps & calendrier",2],
+
+  /* ===== Météo ===== */
+  ["hava","temps (météo)","Météo",1],["güneş","soleil","Météo",1],["güneşli","ensoleillé","Météo",1],
+  ["yağmur","pluie","Météo",1],["yağmurlu","pluvieux","Météo",1],["kar","neige","Météo",1],
+  ["karlı","neigeux","Météo",2],["rüzgar","vent","Météo",1],["rüzgarlı","venteux","Météo",2],
+  ["bulut","nuage","Météo",1],["bulutlu","nuageux","Météo",1],["ılık","tiède","Météo",2],
+  ["nem","humidité","Météo",2],["sis","brouillard","Météo",2],["fırtına","tempête","Météo",2],
+  ["gökkuşağı","arc-en-ciel","Météo",2],["derece","degré","Météo",2],
+
+  /* ===== Lieux & déplacements ===== */
+  ["şehir","ville","Lieux & déplacements",1],["köy","village","Lieux & déplacements",1],["ülke","pays","Lieux & déplacements",1],
+  ["sokak","rue","Lieux & déplacements",1],["cadde","avenue","Lieux & déplacements",2],["yol","route / chemin","Lieux & déplacements",1],
+  ["meydan","place","Lieux & déplacements",2],["park","parc","Lieux & déplacements",1],["okul","école","Lieux & déplacements",1],
+  ["market","épicerie","Lieux & déplacements",1],["pazar yeri","marché","Lieux & déplacements",1],["mağaza","magasin","Lieux & déplacements",1],
+  ["cami","mosquée","Lieux & déplacements",1],["banka","banque","Lieux & déplacements",1],["postane","poste","Lieux & déplacements",2],
+  ["istasyon","gare","Lieux & déplacements",1],["havalimanı","aéroport","Lieux & déplacements",1],["otobüs","bus","Lieux & déplacements",1],
+  ["tren","train","Lieux & déplacements",1],["uçak","avion","Lieux & déplacements",1],["araba","voiture","Lieux & déplacements",1],
+  ["taksi","taxi","Lieux & déplacements",1],["bisiklet","vélo","Lieux & déplacements",1],["vapur","ferry","Lieux & déplacements",2],
+  ["durak","arrêt","Lieux & déplacements",1],["bilet","billet","Lieux & déplacements",1],["harita","carte","Lieux & déplacements",1],
+  ["sağ","droite","Lieux & déplacements",1],["sol","gauche","Lieux & déplacements",1],["düz","tout droit","Lieux & déplacements",1],
+  ["ileri","en avant","Lieux & déplacements",2],["geri","en arrière","Lieux & déplacements",2],["yakın","proche","Lieux & déplacements",1],
+  ["uzak","loin","Lieux & déplacements",1],["burada","ici","Lieux & déplacements",1],["orada","là-bas","Lieux & déplacements",1],
+  ["deniz","mer","Lieux & déplacements",1],["dağ","montagne","Lieux & déplacements",1],["nehir","rivière","Lieux & déplacements",2],
+  ["göl","lac","Lieux & déplacements",2],["orman","forêt","Lieux & déplacements",2],["plaj","plage","Lieux & déplacements",1],
+
+  /* ===== Argent & courses ===== */
+  ["para","argent","Argent & courses",1],["lira","lire (monnaie)","Argent & courses",1],["fiyat","prix","Argent & courses",1],
+  ["ucuz","bon marché","Argent & courses",1],["pahalı","cher","Argent & courses",1],["indirim","réduction","Argent & courses",2],
+  ["alışveriş","courses","Argent & courses",1],["nakit","espèces","Argent & courses",2],["kart","carte","Argent & courses",1],
+  ["bozuk para","monnaie","Argent & courses",2],["fatura","facture","Argent & courses",2],["kasa","caisse","Argent & courses",2],
+  ["poşet","sachet","Argent & courses",2],["kilo","kilo","Argent & courses",1],["tane","pièce (compteur)","Argent & courses",2],
+  ["bedava","gratuit","Argent & courses",1],["hediye","cadeau","Argent & courses",1],["müşteri","client","Argent & courses",2],
+  ["satıcı","vendeur","Argent & courses",2],
+
+  /* ===== Nombres & quantités ===== */
+  ["sıfır","zéro","Nombres",1],["bir","un","Nombres",1],["iki","deux","Nombres",1],["üç","trois","Nombres",1],
+  ["dört","quatre","Nombres",1],["beş","cinq","Nombres",1],["altı","six","Nombres",1],["yedi","sept","Nombres",1],
+  ["sekiz","huit","Nombres",1],["dokuz","neuf","Nombres",1],["on","dix","Nombres",1],["on bir","onze","Nombres",1],
+  ["on iki","douze","Nombres",1],["yirmi","vingt","Nombres",1],["otuz","trente","Nombres",1],["kırk","quarante","Nombres",1],
+  ["elli","cinquante","Nombres",1],["altmış","soixante","Nombres",1],["yetmiş","soixante-dix","Nombres",1],
+  ["seksen","quatre-vingts","Nombres",1],["doksan","quatre-vingt-dix","Nombres",1],["yüz","cent","Nombres",1],
+  ["bin","mille","Nombres",1],["milyon","million","Nombres",2],["birinci","premier","Nombres",1],["ikinci","deuxième","Nombres",1],
+  ["üçüncü","troisième","Nombres",2],["yarım","demi","Nombres",1],["çeyrek","quart","Nombres",2],["çok","beaucoup","Nombres",1],
+  ["az","peu","Nombres",1],["biraz","un peu","Nombres",1],["hepsi","tout","Nombres",1],["hiç","aucun / pas du tout","Nombres",1],
+  ["birkaç","quelques","Nombres",2],["bütün","entier","Nombres",2],["yarı","moitié","Nombres",2],
+
+  /* ===== Questions ===== */
+  ["ne","quoi","Questions",1],["kim","qui","Questions",1],["nerede","où","Questions",1],
+  ["nereye","où (vers)","Questions",1],["nereden","d'où","Questions",1],["ne zaman","quand","Questions",1],
+  ["nasıl","comment","Questions",1],["neden","pourquoi","Questions",1],["niçin","pourquoi","Questions",2],
+  ["kaç","combien","Questions",1],["hangi","quel","Questions",1],["kimin","à qui","Questions",2],
+
+  /* ===== Verbes ===== */
+  ["olmak","être / devenir","Verbes",1],["yapmak","faire","Verbes",1],["etmek","faire (auxiliaire)","Verbes",1],
+  ["gitmek","aller","Verbes",1],["gelmek","venir","Verbes",1],["görmek","voir","Verbes",1],["bakmak","regarder","Verbes",1],
+  ["duymak","entendre","Verbes",1],["dinlemek","écouter","Verbes",1],["konuşmak","parler","Verbes",1],
+  ["söylemek","dire","Verbes",1],["demek","dire","Verbes",1],["anlamak","comprendre","Verbes",1],["bilmek","savoir","Verbes",1],
+  ["tanımak","connaître (qqn)","Verbes",1],["istemek","vouloir","Verbes",1],["sevmek","aimer","Verbes",1],
+  ["beğenmek","apprécier","Verbes",2],["yemek yapmak","cuisiner","Verbes",1],["içmek","boire","Verbes",1],
+  ["almak","prendre / acheter","Verbes",1],["vermek","donner","Verbes",1],["okumak","lire","Verbes",1],["yazmak","écrire","Verbes",1],
+  ["çalışmak","travailler","Verbes",1],["oynamak","jouer","Verbes",1],["uyumak","dormir","Verbes",1],["uyanmak","se réveiller","Verbes",1],
+  ["kalkmak","se lever","Verbes",1],["oturmak","s'asseoir / habiter","Verbes",1],["durmak","s'arrêter","Verbes",2],
+  ["yürümek","marcher","Verbes",1],["koşmak","courir","Verbes",1],["açmak","ouvrir","Verbes",1],["kapatmak","fermer","Verbes",1],
+  ["başlamak","commencer","Verbes",1],["bitirmek","finir","Verbes",1],["bulmak","trouver","Verbes",1],["aramak","chercher / appeler","Verbes",1],
+  ["sormak","demander","Verbes",1],["cevaplamak","répondre","Verbes",2],["beklemek","attendre","Verbes",1],["düşünmek","penser","Verbes",1],
+  ["unutmak","oublier","Verbes",1],["hatırlamak","se souvenir","Verbes",1],["öğrenmek","apprendre","Verbes",1],["öğretmek","enseigner","Verbes",2],
+  ["kullanmak","utiliser","Verbes",1],["getirmek","apporter","Verbes",1],["götürmek","emmener","Verbes",1],["koymak","poser / mettre","Verbes",1],
+  ["göstermek","montrer","Verbes",1],["tutmak","tenir","Verbes",1],["bırakmak","laisser","Verbes",2],["geçmek","passer","Verbes",1],
+  ["çıkmak","sortir","Verbes",1],["girmek","entrer","Verbes",1],["binmek","monter (véhicule)","Verbes",1],["inmek","descendre","Verbes",1],
+  ["dönmek","tourner / rentrer","Verbes",1],["kalmak","rester","Verbes",1],["yaşamak","vivre","Verbes",1],["ölmek","mourir","Verbes",2],
+  ["doğmak","naître","Verbes",2],["gülmek","rire","Verbes",1],["ağlamak","pleurer","Verbes",1],["satmak","vendre","Verbes",1],
+  ["ödemek","payer","Verbes",1],["pişirmek","cuire (cuisiner)","Verbes",1],["yıkamak","laver","Verbes",1],["temizlemek","nettoyer","Verbes",1],
+  ["kesmek","couper","Verbes",1],["kırmak","casser","Verbes",2],["giymek","mettre (vêtement)","Verbes",1],["sürmek","conduire","Verbes",1],
+  ["yüzmek","nager","Verbes",1],["düşmek","tomber","Verbes",2],["çekmek","tirer","Verbes",2],["itmek","pousser","Verbes",2],
+  ["vurmak","frapper","Verbes",2],["öpmek","embrasser","Verbes",1],["sarılmak","serrer dans les bras","Verbes",1],["gülümsemek","sourire","Verbes",2],
+  ["gezmek","se promener","Verbes",1],["dinlenmek","se reposer","Verbes",1],["yorulmak","se fatiguer","Verbes",2],["acıkmak","avoir faim","Verbes",1],
+  ["susamak","avoir soif","Verbes",1],["kazanmak","gagner","Verbes",1],["kaybetmek","perdre","Verbes",1],["seçmek","choisir","Verbes",1],
+  ["denemek","essayer","Verbes",1],["korkmak","avoir peur","Verbes",1],["kızmak","se fâcher","Verbes",2],["inanmak","croire","Verbes",1],
+  ["güvenmek","faire confiance","Verbes",2],["yardım etmek","aider","Verbes",1],["teşekkür etmek","remercier","Verbes",1],
+  ["ziyaret etmek","rendre visite","Verbes",1],["davet etmek","inviter","Verbes",1],["tanışmak","faire connaissance","Verbes",1],
+
+  /* ===== Mots-outils & connecteurs ===== */
+  ["ve","et","Mots-outils",1],["veya","ou","Mots-outils",1],["ama","mais","Mots-outils",1],
+  ["çünkü","parce que","Mots-outils",1],["için","pour","Mots-outils",1],["ile","avec","Mots-outils",1],
+  ["gibi","comme","Mots-outils",1],["kadar","jusqu'à / autant que","Mots-outils",2],["ancak","seulement / mais","Mots-outils",2],
+  ["yani","c'est-à-dire","Mots-outils",1],["ya da","ou bien","Mots-outils",1],["eğer","si","Mots-outils",1],
+  ["rağmen","malgré","Mots-outils",2],["göre","selon","Mots-outils",2],["hakkında","à propos de","Mots-outils",2],
+  ["karşı","contre","Mots-outils",2],["arasında","entre","Mots-outils",2],["içinde","dans","Mots-outils",1],
+  ["üstünde","sur","Mots-outils",1],["altında","sous","Mots-outils",1],["yanında","à côté de","Mots-outils",1],
+  ["sadece","seulement","Mots-outils",1],["bile","même","Mots-outils",2],["belki","peut-être","Mots-outils",1],
+  ["tabii","bien sûr","Mots-outils",1],["ve saire","et cetera","Mots-outils",2],
+
+  /* ===== Adjectifs ===== */
+  ["büyük","grand","Adjectifs",1],["küçük","petit","Adjectifs",1],["uzun","long / grand","Adjectifs",1],["kısa","court","Adjectifs",1],
+  ["geniş","large","Adjectifs",2],["dar","étroit","Adjectifs",2],["yüksek","haut","Adjectifs",1],["alçak","bas","Adjectifs",2],
+  ["kalın","épais","Adjectifs",2],["ince","fin","Adjectifs",2],["ağır","lourd","Adjectifs",1],["hafif","léger","Adjectifs",1],
+  ["yeni","nouveau","Adjectifs",1],["eski","vieux / ancien","Adjectifs",1],["genç","jeune","Adjectifs",1],["yaşlı","âgé","Adjectifs",1],
+  ["güzel","beau","Adjectifs",1],["çirkin","laid","Adjectifs",2],["iyi","bon","Adjectifs",1],["kötü","mauvais","Adjectifs",1],
+  ["kolay","facile","Adjectifs",1],["zor","difficile","Adjectifs",1],["hızlı","rapide","Adjectifs",1],["yavaş","lent","Adjectifs",1],
+  ["temiz","propre","Adjectifs",1],["kirli","sale","Adjectifs",1],["dolu","plein","Adjectifs",2],["boş","vide","Adjectifs",2],
+  ["açık","ouvert / clair","Adjectifs",1],["kapalı","fermé","Adjectifs",1],["doğru","correct / vrai","Adjectifs",1],["yanlış","faux","Adjectifs",1],
+  ["aynı","même","Adjectifs",1],["farklı","différent","Adjectifs",1],["önemli","important","Adjectifs",1],["güçlü","fort","Adjectifs",1],
+  ["zayıf","faible","Adjectifs",2],["zengin","riche","Adjectifs",2],["fakir","pauvre","Adjectifs",2],["sıcak","chaud","Adjectifs",1],
+  ["soğuk","froid","Adjectifs",1],["sert","dur","Adjectifs",2],["yumuşak","mou / doux","Adjectifs",2],["renkli","coloré","Adjectifs",2],
+  ["karanlık","sombre","Adjectifs",2],["aydınlık","lumineux","Adjectifs",2],["derin","profond","Adjectifs",2],["tehlikeli","dangereux","Adjectifs",2],
+  ["güvenli","sûr","Adjectifs",2],["taze","frais","Adjectifs",1],
+
+  /* ===== Adverbes ===== */
+  ["her zaman","toujours","Adverbes",1],["bazen","parfois","Adverbes",1],["sık sık","souvent","Adverbes",1],
+  ["nadiren","rarement","Adverbes",2],["genellikle","généralement","Adverbes",2],["hemen","tout de suite","Adverbes",1],
+  ["fazla","trop","Adverbes",1],["gerçekten","vraiment","Adverbes",1],["maalesef","malheureusement","Adverbes",2],
+  ["artık","désormais","Adverbes",2],["henüz","encore / pas encore","Adverbes",2],["zaten","de toute façon","Adverbes",2],
+  ["yine","encore","Adverbes",1],["tekrar","de nouveau","Adverbes",1],["birlikte","ensemble","Adverbes",1],
+  ["yukarı","en haut","Adverbes",1],["aşağı","en bas","Adverbes",1],["dışarı","dehors","Adverbes",1],["içeri","dedans","Adverbes",1],
+  ["hızlıca","rapidement","Adverbes",2],["yavaşça","lentement","Adverbes",2],
+
+  /* ===== Animaux ===== */
+  ["kedi","chat","Animaux",1],["köpek","chien","Animaux",1],["kuş","oiseau","Animaux",1],["at","cheval","Animaux",1],
+  ["eşek","âne","Animaux",2],["inek","vache","Animaux",1],["koyun","mouton","Animaux",1],["kuzu","agneau","Animaux",2],
+  ["keçi","chèvre","Animaux",2],["tavuk hayvan","poule","Animaux",2],["horoz","coq","Animaux",2],["ördek","canard","Animaux",2],
+  ["hindi","dinde","Animaux",2],["tavşan","lapin","Animaux",2],["fare","souris","Animaux",2],["sincap","écureuil","Animaux",2],
+  ["aslan","lion","Animaux",1],["kaplan","tigre","Animaux",2],["ayı","ours","Animaux",1],["kurt","loup","Animaux",2],
+  ["tilki","renard","Animaux",2],["geyik","cerf","Animaux",2],["fil","éléphant","Animaux",1],["zürafa","girafe","Animaux",2],
+  ["maymun","singe","Animaux",1],["deve","chameau","Animaux",2],["yılan","serpent","Animaux",1],["kaplumbağa","tortue","Animaux",2],
+  ["kurbağa","grenouille","Animaux",2],["timsah","crocodile","Animaux",2],["kelebek","papillon","Animaux",1],["arı","abeille","Animaux",1],
+  ["sinek","mouche","Animaux",2],["sivrisinek","moustique","Animaux",2],["karınca","fourmi","Animaux",1],["örümcek","araignée","Animaux",1],
+  ["kartal","aigle","Animaux",2],["baykuş","hibou","Animaux",2],["güvercin","pigeon","Animaux",2],["balina","baleine","Animaux",2],
+  ["yunus","dauphin","Animaux",2],["köpekbalığı","requin","Animaux",2]
+];
+
+/* dédup par terme turc (garde la 1re occurrence) */
+const ITEMS=[]; {const seen=new Set(); let id=0;
+  for(const r of RAW){ if(seen.has(r[0])) continue; seen.add(r[0]); ITEMS.push({id:id++,tr:r[0],fr:r[1],cat:r[2],prio:r[3]}); }}
+
+const CAT_ICON={"Politesse":"🤝","Phrases":"💬","Famille":"👪","À table":"🍽️","Aliments":"🍎","Sentiments":"😊",
+  "Corps & santé":"🩺","Maison & objets":"🏠","Vêtements":"👕","Temps & calendrier":"📅","Météo":"🌤️",
+  "Lieux & déplacements":"🧭","Argent & courses":"🛒","Nombres":"🔢","Questions":"❓","Verbes":"⚡",
+  "Mots-outils":"🔗","Adjectifs":"🎨","Adverbes":"⏱️","Animaux":"🐾"};
+const CATS=[]; {const s=new Set(); for(const it of ITEMS){ if(!s.has(it.cat)){s.add(it.cat);CATS.push(it.cat);} }}
+
+/* ---------- état / stockage ---------- */
+const LS_KEY="turkce_app_v2"; /* progression rangée par mot turc: ajouter du vocab ne casse rien */
+let STATE={progress:{},days:{},v:1};
+function dkey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function today(){return dkey(new Date());}
+function load(){
+  try{const raw=localStorage.getItem(LS_KEY); if(raw) STATE=Object.assign({progress:{},days:{},v:1},JSON.parse(raw));}catch(e){}
+  ITEMS.forEach(it=>{ if(!STATE.progress[it.tr]) STATE.progress[it.tr]={box:1,seen:0,correct:0,wrong:0,last:0}; });
+}
+function save(){ try{localStorage.setItem(LS_KEY,JSON.stringify(STATE));}catch(e){} }
+
+function dirOf(key){ const p=STATE.progress[key]; return (p&&p.box>=3) ? "fr2tr" : "tr2fr"; }
+function logDay(field){ const d=today(); if(!STATE.days[d])STATE.days[d]={seen:0,correct:0,wrong:0}; STATE.days[d][field]++; if(field!=="seen")STATE.days[d].seen; }
+function grade(key,ok){
+  const p=STATE.progress[key]; p.seen++; p.last=Date.now();
+  const d=today(); if(!STATE.days[d])STATE.days[d]={seen:0,correct:0,wrong:0}; STATE.days[d].seen++;
+  if(ok){ p.correct++; STATE.days[d].correct++; p.box = p.box===1 ? 3 : Math.min(5,p.box+1); }
+  else { p.wrong++; STATE.days[d].wrong++; p.box=Math.max(1,p.box-1); }
+  save();
+}
+function touch(key){ const p=STATE.progress[key]; p.seen++; p.last=Date.now();
+  const d=today(); if(!STATE.days[d])STATE.days[d]={seen:0,correct:0,wrong:0}; STATE.days[d].seen++; save(); }
+
+function pickItems(n,filter){
+  const pool=ITEMS.filter(filter||(()=>true));
+  const scored=pool.map(it=>{ const p=STATE.progress[it.tr];
+    let w=(6-p.box); if(p.seen===0)w+=3; if(it.prio===1)w+=1.5; w+=Math.random()*1.2; return {it,w}; });
+  scored.sort((a,b)=>b.w-a.w);
+  return scored.slice(0,Math.min(n,scored.length)).map(s=>s.it);
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---------- navigation ---------- */
+function go(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.remove("active"));
+  document.getElementById("v-"+v).classList.add("active");
+  if(v==="home") renderDash();
+  if(v==="train") renderGameList();
+  if(v==="revcats") renderCats();
+  if(v==="save") refreshExport();
+  window.scrollTo(0,0);
+}
+
+/* ---------- dashboard ---------- */
+function seenOn(k){return (STATE.days[k]||{}).seen||0;}
+function streak(){ let s=0; const d=new Date();
+  for(;;){ const k=dkey(d); if(seenOn(k)>0){s++;d.setDate(d.getDate()-1);} else { if(k===today()){d.setDate(d.getDate()-1);continue;} break; } } return s; }
+function weekData(){ const out=[]; const L=["D","L","M","M","J","V","S"];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); out.push({label:L[d.getDay()],val:seenOn(dkey(d)),today:i===0}); } return out; }
+function monthData(){ const out=[];
+  for(let w=5;w>=0;w--){ let sum=0; const start=new Date(); start.setDate(start.getDate()-(w*7)-6);
+    for(let j=0;j<7;j++){ const d=new Date(start); d.setDate(start.getDate()+j); sum+=seenOn(dkey(d)); }
+    out.push({label:(start.getDate())+"/"+(start.getMonth()+1),val:sum,today:w===0}); } return out; }
+function drawChart(data){
+  const max=Math.max(1,...data.map(d=>d.val));
+  document.getElementById("chart").innerHTML=data.map(d=>
+    '<div class="barcol"><div class="bval">'+(d.val||"")+'</div><div class="bwrap"><div class="bar'+(d.today?" today":"")+'" style="height:'+Math.round(100*d.val/max)+'%"></div></div><div class="blab">'+d.label+'</div></div>').join('');
+}
+let RANGE="week";
+function renderDash(){
+  const h=new Date().getHours();
+  document.getElementById("greet").textContent=h<11?"Günaydın 🌅":(h<18?"Merhaba 👋":"İyi akşamlar 🌙");
+  const st=streak();
+  document.getElementById("greet-sub").textContent=st>0?(st+" jour"+(st>1?"s":"")+" d'affilée. Continue comme ça."):"Prêt pour une première manche ?";
+  const t=STATE.days[today()]||{seen:0,correct:0,wrong:0};
+  document.getElementById("s-streak").textContent=st;
+  document.getElementById("s-today").textContent=t.seen;
+  const ans=t.correct+t.wrong; document.getElementById("s-acc").textContent=ans?Math.round(100*t.correct/ans)+"%":"–";
+  drawChart(RANGE==="month"?monthData():weekData());
+  const counts=[0,0,0,0,0]; ITEMS.forEach(it=>{const p=STATE.progress[it.tr]; if(p)counts[p.box-1]++;});
+  const total=ITEMS.length, maxc=Math.max(1,...counts);
+  document.getElementById("mastery").innerHTML=counts.map((c,i)=>
+    '<div class="tile"><div class="tbar"><span style="height:'+Math.round(100*c/maxc)+'%"></span></div><div class="tn">'+c+'</div><div class="tl">boîte '+(i+1)+'</div></div>').join('');
+}
+document.getElementById("range-seg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b)return;
+  document.querySelectorAll("#range-seg button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  RANGE=b.dataset.r; drawChart(RANGE==="month"?monthData():weekData()); });
+
+/* ---------- training menu ---------- */
+const GAMES=[
+  {t:"qcm",i:"🎯",n:"QCM",s:"20 mots · reconnais la traduction"},
+  {t:"cartes",i:"🃏",n:"Cartes",s:"15 cartes · révise en profondeur"},
+  {t:"match",i:"🔗",n:"Association",s:"grilles de 6 paires · détente"},
+  {t:"ecoute",i:"🔊",n:"Écoute",s:"15 mots · comprends à l'oral"},
+  {t:"ordre",i:"🧩",n:"Remets la phrase",s:"8 phrases · dans le bon ordre"}
+];
+function renderGameList(){
+  document.getElementById("game-list").innerHTML=GAMES.map(g=>
+    '<div class="gcard glass" onclick="startGame(\''+g.t+'\')"><div class="gico">'+g.i+'</div>'+
+    '<div><div class="gn">'+g.n+'</div><div class="gs">'+g.s+'</div></div>'+
+    '<span class="gchev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></div>').join('');
+}
+
+/* ---------- revision ---------- */
+function renderCats(){
+  document.getElementById("cat-grid").innerHTML=CATS.map(c=>{
+    const n=ITEMS.filter(x=>x.cat===c).length;
+    return '<div class="catcard glass" onclick="openRev(\''+c.replace(/'/g,"\\'")+'\')"><div class="catico">'+(CAT_ICON[c]||"📁")+'</div>'+
+      '<div><div class="catname">'+c+'</div><div class="catcount">'+n+' mots</div></div></div>';
+  }).join('');
+}
+let REV_CAT=null, REV_DIR="tr2fr";
+function openRev(cat){
+  REV_CAT=cat; go("revlist");
+  document.getElementById("rev-title").textContent=(CAT_ICON[cat]||"")+" "+cat;
+  const list=ITEMS.filter(x=>x.cat===cat);
+  document.getElementById("rev-sub").textContent=list.length+" mots · touche « Français → Turc » pour inverser";
+  document.getElementById("rev-practice").onclick=()=>startGame("qcm",it=>it.cat===cat,"revlist");
+  drawRevList();
+}
+function drawRevList(){
+  const list=ITEMS.filter(x=>x.cat===REV_CAT);
+  document.getElementById("rev-list").innerHTML=list.map(it=>
+    '<div class="wrow glass'+(REV_DIR==="fr2tr"?" rev":"")+'"><div class="a">'+it.tr+'</div><div class="b">'+it.fr+'</div></div>').join('');
+}
+document.getElementById("rev-dir").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b)return;
+  document.querySelectorAll("#rev-dir button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  REV_DIR=b.dataset.d; drawRevList(); });
+
+/* ---------- game engine ---------- */
+let G=null;
+const body=document.getElementById("stage-body");
+function setProg(d,t){ document.getElementById("prog-bar").style.width=(t?Math.round(100*d/t):0)+"%"; document.getElementById("prog-txt").textContent=d+"/"+t; }
+function quitGame(){ const back=(G&&G.back)||"train"; G=null; go(back); }
+function feedback(ok,corr){ const fb=document.getElementById("fb"); fb.className="fb show "+(ok?"ok":"no");
+  fb.innerHTML=(ok?"Doğru ✓":"Yanlış")+(corr?'<small>'+corr+'</small>':''); clearTimeout(fb._t); fb._t=setTimeout(()=>fb.className="fb",1150); }
+function startGame(type,filter,back){ go("stage"); G={type,filter:filter||null,back:back||"train"};
+  if(type==="qcm")gQcm(); else if(type==="cartes")gCards(); else if(type==="match")gMatch(); else if(type==="ecoute")gListen(); else if(type==="ordre")gOrder(); }
+function endRound(correct,total){
+  const pct=total?Math.round(100*correct/total):0;
+  body.innerHTML='<div class="result"><div class="score">'+correct+'/'+total+'</div>'+
+    '<div class="rlab">'+(pct>=80?"Harika ! 🎉":pct>=50?"Güzel, devam et 💪":"Tekrar dene 🙂")+'</div>'+
+    '<button class="btn btn-coral" id="again">Nouvelle manche</button><div style="height:10px"></div>'+
+    '<button class="btn btn-sec" onclick="quitGame()">Terminer</button></div>';
+  setProg(total,total); document.getElementById("again").onclick=()=>startGame(G.type,G.filter,G.back);
+}
+
+/* QCM */
+function gQcm(){ G.items=pickItems(20,G.filter); G.i=0; G.correct=0; nextQcm(); }
+function nextQcm(){
+  if(G.i>=G.items.length) return endRound(G.correct,G.items.length);
+  setProg(G.i,G.items.length);
+  const it=G.items[G.i], dir=dirOf(it.tr);
+  const q=dir==="fr2tr"?it.fr:it.tr, ans=dir==="fr2tr"?it.tr:it.fr;
+  let others=shuffle(ITEMS.filter(x=>x.id!==it.id&&x.cat===it.cat)); if(others.length<3)others=others.concat(shuffle(ITEMS.filter(x=>x.id!==it.id)));
+  const opts=shuffle([ans].concat(others.slice(0,3).map(x=>dir==="fr2tr"?x.tr:x.fr)));
+  body.innerHTML='<div style="text-align:center"><span class="dir-pill '+(dir==="fr2tr"?"dir-fr":"dir-tr")+'">'+(dir==="fr2tr"?"français → turc":"turc → français")+'</span></div>'+
+    '<div class="prompt">'+q+'</div><div class="choices" id="ch"></div>';
+  const ch=document.getElementById("ch");
+  opts.forEach(o=>{ const b=document.createElement("button"); b.className="choice glass"; b.textContent=o;
+    b.onclick=()=>{ const ok=o===ans; Array.from(ch.children).forEach(c=>{ c.onclick=null;
+        if(c.textContent===ans)c.classList.add("correct"); else if(c===b)c.classList.add("wrong"); else c.classList.add("dim"); });
+      grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":ans); setTimeout(()=>{G.i++;nextQcm();},ok?650:1150); };
+    ch.appendChild(b); });
+}
+
+/* Cartes */
+function gCards(){ G.items=pickItems(15,G.filter); G.i=0; G.correct=0; nextCard(); }
+function nextCard(){
+  if(G.i>=G.items.length) return endRound(G.correct,G.items.length);
+  setProg(G.i,G.items.length);
+  const it=G.items[G.i], dir=dirOf(it.tr);
+  const front=dir==="fr2tr"?it.fr:it.tr, back=dir==="fr2tr"?it.tr:it.fr;
+  const fl=dir==="fr2tr"?"français":"turc", bl=dir==="fr2tr"?"turc":"français";
+  body.innerHTML='<div style="text-align:center"><span class="dir-pill '+(dir==="fr2tr"?"dir-fr":"dir-tr")+'">'+(dir==="fr2tr"?"trouve le turc":"trouve le sens")+'</span></div>'+
+    '<div class="flash" id="flash"><div class="flash-in">'+
+    '<div class="face front glass"><div class="lab">'+fl+'</div><div class="big">'+front+'</div></div>'+
+    '<div class="face back glass"><div class="lab">'+bl+'</div><div class="big">'+back+'</div></div></div></div>'+
+    '<div class="hint" id="hint">Touche la carte pour la retourner</div><div id="eval"></div>';
+  const flash=document.getElementById("flash"); let flipped=false;
+  flash.onclick=()=>{ if(flipped)return; flipped=true; flash.classList.add("flip");
+    document.getElementById("hint").textContent="Tu connaissais ?";
+    document.getElementById("eval").innerHTML='<div class="selfeval"><button class="btn btn-ghost" id="no">À revoir</button><button class="btn btn-main" id="yes">Je savais</button></div>';
+    document.getElementById("yes").onclick=e=>{e.stopPropagation();grade(it.tr,true);G.correct++;feedback(true,"");G.i++;nextCard();};
+    document.getElementById("no").onclick=e=>{e.stopPropagation();grade(it.tr,false);feedback(false,back);G.i++;nextCard();}; };
+}
+
+/* Association */
+function gMatch(){ G.rounds=4; G.r=0; G.tot=0; nextMatch(); }
+function nextMatch(){
+  if(G.r>=G.rounds) return endRound(G.tot,G.tot);
+  setProg(G.r,G.rounds);
+  const pairs=pickItems(6,G.filter); G.tot+=pairs.length;
+  const left=shuffle(pairs.map(p=>({key:p.tr,txt:p.tr,ty:"tr"}))), right=shuffle(pairs.map(p=>({key:p.tr,txt:p.fr,ty:"fr"})));
+  const cells=[]; for(let i=0;i<pairs.length;i++){cells.push(left[i]);cells.push(right[i]);}
+  body.innerHTML='<div class="hint">Grille '+(G.r+1)+' / '+G.rounds+' — relie turc et français</div><div class="match-grid" id="mg"></div>';
+  const mg=document.getElementById("mg"); let sel=null,done=0;
+  cells.forEach(c=>{ const el=document.createElement("button"); el.className="mcard glass "+c.ty; el.textContent=c.txt; el.dataset.key=c.key; el.dataset.ty=c.ty;
+    el.onclick=()=>{ if(el.classList.contains("done"))return;
+      if(!sel){sel=el;el.classList.add("sel");return;}
+      if(sel===el){el.classList.remove("sel");sel=null;return;}
+      if(sel.dataset.key===el.dataset.key&&sel.dataset.ty!==el.dataset.ty){
+        sel.classList.add("done");el.classList.add("done");sel.classList.remove("sel");touch(el.dataset.key);sel=null;done++;
+        if(done===pairs.length)setTimeout(()=>{G.r++;nextMatch();},450);
+      }else{ const a=sel,b=el; a.classList.add("err");b.classList.add("err");a.classList.remove("sel");
+        setTimeout(()=>{a.classList.remove("err");b.classList.remove("err");},480); sel=null; } };
+    mg.appendChild(el); });
+}
+
+/* Écoute */
+function speak(txt){ try{ if(!("speechSynthesis"in window))return; const u=new SpeechSynthesisUtterance(txt); u.lang="tr-TR"; u.rate=.85;
+  const v=speechSynthesis.getVoices().find(x=>/tr/i.test(x.lang)); if(v)u.voice=v; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+function gListen(){ G.items=pickItems(15,G.filter?G.filter:(it=>STATE.progress[it.tr].box>=2||it.prio===1)); G.i=0; G.correct=0; nextListen(); }
+function nextListen(){
+  if(G.i>=G.items.length) return endRound(G.correct,G.items.length);
+  setProg(G.i,G.items.length);
+  const it=G.items[G.i];
+  let others=shuffle(ITEMS.filter(x=>x.id!==it.id&&x.cat===it.cat)); if(others.length<3)others=others.concat(shuffle(ITEMS.filter(x=>x.id!==it.id)));
+  const opts=shuffle([it.fr].concat(others.slice(0,3).map(x=>x.fr)));
+  body.innerHTML='<div style="text-align:center"><span class="dir-pill dir-tr">écoute · turc → français</span></div>'+
+    '<button class="speaker" id="spk">🔊</button><div class="hint">Touche pour (ré)écouter</div>'+
+    '<div class="note">Le son utilise la voix de l\'iPhone. Si tu n\'entends rien ou que ça sonne faux, il faudra installer une <b>voix turque</b> (Réglages → Accessibilité → Contenu énoncé → Voix). On réglera ça ensemble.</div>'+
+    '<div class="choices" id="ch"></div>';
+  document.getElementById("spk").onclick=()=>speak(it.tr); speak(it.tr);
+  const ch=document.getElementById("ch");
+  opts.forEach(o=>{ const b=document.createElement("button"); b.className="choice glass"; b.textContent=o;
+    b.onclick=()=>{ const ok=o===it.fr; Array.from(ch.children).forEach(c=>{c.onclick=null;
+        if(c.textContent===it.fr)c.classList.add("correct"); else if(c===b)c.classList.add("wrong"); else c.classList.add("dim");});
+      grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":it.tr+" = "+it.fr); setTimeout(()=>{G.i++;nextListen();},ok?750:1250); };
+    ch.appendChild(b); });
+}
+
+/* Remets la phrase */
+function gOrder(){
+  let phr=ITEMS.filter(it=>it.cat==="Phrases"&&it.tr.trim().indexOf(" ")>0);
+  if(G.filter) phr=phr.filter(G.filter);
+  G.items=shuffle(phr).slice(0,8); G.i=0; G.correct=0;
+  if(G.items.length===0){ body.innerHTML='<div class="result"><div class="rlab" style="margin-top:30px">Pas de phrase à remettre en ordre dans ce thème.</div><button class="btn btn-sec" onclick="quitGame()">Retour</button></div>'; return; }
+  nextOrder();
+}
+function nextOrder(){
+  if(G.i>=G.items.length) return endRound(G.correct,G.items.length);
+  setProg(G.i,G.items.length);
+  const it=G.items[G.i], words=it.tr.split(" ");
+  const scrambled=shuffle(words.map((w,idx)=>({w,idx})));
+  body.innerHTML='<div style="text-align:center"><span class="dir-pill dir-fr">remets la phrase turque</span></div>'+
+    '<div style="text-align:center;font-size:15px;color:var(--muted);margin:6px 0">« '+it.fr+' »</div>'+
+    '<div class="order-target" id="tgt"></div><div class="order-pool" id="pool"></div>'+
+    '<button class="btn btn-main" id="check" disabled>Vérifier</button>';
+  const tgt=document.getElementById("tgt"),pool=document.getElementById("pool"),check=document.getElementById("check");
+  const placed=[]; function refresh(){check.disabled=placed.length!==words.length;}
+  scrambled.forEach(o=>{ const el=document.createElement("button"); el.className="word"; el.textContent=o.w;
+    el.onclick=()=>{ if(el.classList.contains("placed")){ el.classList.remove("placed"); const k=placed.indexOf(el); if(k>=0)placed.splice(k,1); tgt.removeChild(el._chip); pool.appendChild(el);
+      } else { el.classList.add("placed"); const chip=document.createElement("span"); chip.className="word placed"; chip.textContent=o.w; chip.onclick=()=>el.onclick(); el._chip=chip; tgt.appendChild(chip); placed.push(el); }
+      refresh(); };
+    pool.appendChild(el); });
+  check.onclick=()=>{ const attempt=placed.map(e=>e.textContent).join(" ").toLocaleLowerCase("tr");
+    const ok=attempt===it.tr.toLocaleLowerCase("tr"); grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":it.tr); setTimeout(()=>{G.i++;nextOrder();},ok?800:1500); };
+}
+
+/* ---------- sauvegarde ---------- */
+function refreshExport(){ document.getElementById("export-box").value=JSON.stringify({progress:STATE.progress,days:STATE.days,v:STATE.v}); }
+function showMsg(id,txt,ok){ const m=document.getElementById(id); m.textContent=txt; m.className="msg show "+(ok?"ok":"err"); setTimeout(()=>m.className="msg",3800); }
+function copyExport(){ const box=document.getElementById("export-box"); box.select();
+  const done=()=>showMsg("exp-msg","Copié ✓ Colle-le dans tes Notes pour le garder.",true);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(box.value).then(done,()=>{try{document.execCommand("copy");done();}catch(e){showMsg("exp-msg","Sélectionne le texte et copie-le à la main.",false);}});}
+  else{try{document.execCommand("copy");done();}catch(e){showMsg("exp-msg","Sélectionne le texte et copie-le à la main.",false);}} }
+function doImport(){ const raw=document.getElementById("import-box").value.trim(); if(!raw){showMsg("imp-msg","Colle d'abord une sauvegarde.",false);return;}
+  try{ const data=JSON.parse(raw); if(data.progress)STATE.progress=Object.assign(STATE.progress,data.progress); if(data.days)STATE.days=Object.assign(STATE.days,data.days);
+    ITEMS.forEach(it=>{if(!STATE.progress[it.tr])STATE.progress[it.tr]={box:1,seen:0,correct:0,wrong:0,last:0};}); save(); showMsg("imp-msg","Sauvegarde importée ✓",true);
+  }catch(e){showMsg("imp-msg","Ce texte n'est pas une sauvegarde valide.",false);} }
+function resetAll(){ if(!confirm("Effacer toute la progression sur ce téléphone ?"))return;
+  STATE={progress:{},days:{},v:1}; ITEMS.forEach(it=>STATE.progress[it.tr]={box:1,seen:0,correct:0,wrong:0,last:0}); save(); refreshExport(); showMsg("imp-msg","Tout a été remis à zéro.",true); }
+
+/* ---------- init ---------- */
+load();
+if("speechSynthesis"in window){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>{}; }
+renderDash();
+if("serviceWorker"in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+</script>
+</body>
+</html>
