@@ -169,6 +169,17 @@
   .fb.ok{background:linear-gradient(120deg,#12b39a,#0e9c74)} .fb.no{background:linear-gradient(120deg,#e8604f,#d5473b)}
   .fb small{display:block;font-weight:400;font-size:12.5px;opacity:.92;margin-top:2px}
 
+  .search{display:flex;align-items:center;gap:10px;padding:12px 14px;margin-bottom:14px}
+  .search svg{width:18px;height:18px;stroke:var(--muted);flex:none}
+  .search input{border:none;background:none;font:inherit;font-size:15px;flex:1;color:var(--ink);outline:none;min-width:0}
+  .search button{border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px}
+  .lvlbar{height:10px;border-radius:6px;background:rgba(255,255,255,.55);overflow:hidden;border:1px solid var(--line);margin:2px 0 10px}
+  .lvlbar>span{display:block;height:100%;background:linear-gradient(90deg,#25c2b4,#7b6cf0);transition:width .5s}
+  .lvlrow{font-size:12px;color:var(--muted)}
+  .crow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 2px;border-bottom:1px solid var(--hair)}
+  .crow:last-child{border-bottom:none}
+  .cp{font-size:13px;color:var(--muted)} .cp em{font-style:normal;opacity:.6;font-size:11px;margin-left:3px}
+  .cf{font-size:16px;font-weight:680;text-align:right}
   .result{text-align:center;padding:34px 10px}
   .result .score{font-size:52px;font-weight:800;background:linear-gradient(120deg,var(--accent),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
   .result .rlab{color:var(--muted);margin:6px 0 24px;font-size:15px}
@@ -202,6 +213,12 @@
       <div class="kpi glass"><div class="n" id="s-today">0</div><div class="l">mots aujourd'hui</div></div>
       <div class="kpi glass"><div class="n" id="s-acc">–</div><div class="l">précision</div></div>
     </div>
+    <div class="panel glass pad" id="level-panel">
+      <div class="panel-h"><span class="pt2">Ton niveau</span><span id="lvl-badge" class="dir-pill dir-tr">–</span></div>
+      <div class="lvlbar"><span id="lvl-fill" style="width:0%"></span></div>
+      <div class="lvlrow" id="lvl-counts"></div>
+      <div class="hint" style="text-align:left;margin-top:10px" id="lvl-note"></div>
+    </div>
     <div class="panel glass pad">
       <div class="panel-h"><span class="pt2">Activité</span>
         <div class="seg" id="range-seg"><button class="on" data-r="week">Semaine</button><button data-r="month">Mois</button></div>
@@ -231,6 +248,12 @@
       <div><div class="gn">Révision par thème</div><div class="gs">choisis une catégorie précise à revoir</div></div>
       <span class="gchev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </div>
+    <div class="sec-title">Grammaire</div>
+    <div class="gcard feature glass" onclick="go('conj')">
+      <div class="gico">🔤</div>
+      <div><div class="gn">Conjugaison</div><div class="gs">présent, passé et futur des verbes courants</div></div>
+      <span class="gchev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+    </div>
   </section>
 
   <!-- STAGE -->
@@ -247,7 +270,13 @@
   <section id="v-revcats" class="view">
     <button class="back" onclick="go('train')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Entraînement</button>
     <h1 class="t">Révision par thème</h1>
-    <div class="sub">Choisis une catégorie pour voir tous ses mots.</div>
+    <div class="sub">Cherche un mot, ou choisis une catégorie pour voir tous ses mots.</div>
+    <div class="search glass">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="rev-search" type="text" placeholder="Chercher en français ou en turc…" autocomplete="off" autocapitalize="off">
+      <button id="rev-search-clear" aria-label="Effacer">✕</button>
+    </div>
+    <div id="search-results" class="wlist"></div>
     <div class="catgrid" id="cat-grid"></div>
   </section>
 
@@ -286,6 +315,22 @@
       <p style="font-size:13px;color:var(--muted);margin:0 0 10px">Efface toute la progression sur ce téléphone. Irréversible.</p>
       <button class="btn btn-ghost" style="color:var(--bad)" onclick="resetAll()">Tout remettre à zéro</button>
     </div>
+  </section>
+
+  <!-- CONJUGAISON : liste -->
+  <section id="v-conj" class="view">
+    <button class="back" onclick="go('train')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Entraînement</button>
+    <h1 class="t">Conjugaison</h1>
+    <div class="sub">Choisis un verbe pour voir le présent, le passé et le futur.</div>
+    <div class="glist" id="conj-list"></div>
+  </section>
+
+  <!-- CONJUGAISON : tableau -->
+  <section id="v-conjtable" class="view">
+    <button class="back" onclick="go('conj')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Verbes</button>
+    <h1 class="t" id="conj-title">Verbe</h1>
+    <div class="sub" id="conj-sub"></div>
+    <div id="conj-body"></div>
   </section>
 
 </main>
@@ -608,7 +653,54 @@ const RAW = [
   ["kurbağa","grenouille","Animaux",2],["timsah","crocodile","Animaux",2],["kelebek","papillon","Animaux",1],["arı","abeille","Animaux",1],
   ["sinek","mouche","Animaux",2],["sivrisinek","moustique","Animaux",2],["karınca","fourmi","Animaux",1],["örümcek","araignée","Animaux",1],
   ["kartal","aigle","Animaux",2],["baykuş","hibou","Animaux",2],["güvercin","pigeon","Animaux",2],["balina","baleine","Animaux",2],
-  ["yunus","dauphin","Animaux",2],["köpekbalığı","requin","Animaux",2]
+  ["yunus","dauphin","Animaux",2],["köpekbalığı","requin","Animaux",2],
+
+  /* ===== Ajouts ===== */
+  ["ben","je / moi","Pronoms",1],["sen","tu / toi","Pronoms",1],["o","il / elle","Pronoms",1],
+  ["biz","nous","Pronoms",1],["siz","vous","Pronoms",1],["onlar","ils / elles","Pronoms",1],
+  ["bu","ceci / ce","Pronoms",1],["şu","cela","Pronoms",2],["bunlar","ceux-ci","Pronoms",2],
+  ["benim","mon / ma","Pronoms",1],["senin","ton / ta","Pronoms",1],["bizim","notre","Pronoms",2],
+  ["renk","couleur","Couleurs",1],["kırmızı","rouge","Couleurs",1],["mavi","bleu","Couleurs",1],
+  ["yeşil","vert","Couleurs",1],["sarı","jaune","Couleurs",1],["siyah","noir","Couleurs",1],
+  ["beyaz","blanc","Couleurs",1],["turuncu","orange","Couleurs",2],["mor","violet","Couleurs",2],
+  ["pembe","rose","Couleurs",2],["gri","gris","Couleurs",2],["kahverengi","marron","Couleurs",2],
+  ["lacivert","bleu marine","Couleurs",2],
+  ["nasıl gidiyor","comment ça va (ça se passe)","Phrases",1],["ne haber","quoi de neuf","Phrases",2],
+  ["her şey yolunda","tout va bien","Phrases",1],["çok mutluyum","je suis très heureux","Phrases",1],
+  ["eve hoş geldiniz","bienvenue à la maison","Phrases",1],["sofraya buyurun","à table, je vous en prie","Phrases",1],
+  ["biraz daha ister misiniz","en voulez-vous encore un peu","Phrases",1],["doydum teşekkürler","je suis rassasié, merci","Phrases",1],
+  ["çok naziksiniz","vous êtes très gentil","Phrases",1],["yarın görüşürüz","à demain","Phrases",1],
+  ["iyi uykular","dors bien","Phrases",2],["başka bir şey ister misin","veux-tu autre chose","Phrases",2],
+  ["seninle tanışmak güzeldi","c'était un plaisir de te rencontrer","Phrases",1],["tekrar geleceğim","je reviendrai","Phrases",1],
+  ["yardım edeyim mi","je t'aide ?","Phrases",1],["bir dakika","une minute","Phrases",1],
+  ["geliyorum","j'arrive","Phrases",1],["anladın mı","tu as compris ?","Phrases",1],
+  ["burada bekle","attends ici","Phrases",2],["hemen dönerim","je reviens tout de suite","Phrases",2],
+  ["acıktım","j'ai faim (maintenant)","Phrases",1],["çok yoruldum","je suis très fatigué","Phrases",1],
+  ["izlemek","regarder / suivre","Verbes",1],["hazırlamak","préparer","Verbes",1],["dokunmak","toucher","Verbes",2],
+  ["hissetmek","ressentir","Verbes",1],["karar vermek","décider","Verbes",1],["hoşlanmak","apprécier / aimer bien","Verbes",2],
+  ["özlemek","manquer (à qqn)","Verbes",1],["affetmek","pardonner","Verbes",2],["yardımcı olmak","aider","Verbes",1],
+  ["söz vermek","promettre","Verbes",2],
+  ["meşgul","occupé","Adjectifs",1],["hazır","prêt","Adjectifs",1],["tembel","paresseux","Adjectifs",2],
+  ["çalışkan","travailleur","Adjectifs",2],["komik","drôle","Adjectifs",1],["ciddi","sérieux","Adjectifs",2],
+  ["nazik","gentil / poli","Adjectifs",1],["akıllı","intelligent","Adjectifs",1],["deli","fou","Adjectifs",2],
+  ["sağlıklı","en bonne santé","Adjectifs",2],["yakışıklı","beau (homme)","Adjectifs",2],
+  ["simit","simit (anneau au sésame)","Aliments",1],["menemen","menemen (œufs-tomates)","Aliments",2],
+  ["turşu","cornichons / pickles","Aliments",2],["maden suyu","eau gazeuse","Aliments",2],
+  ["kaşar","fromage kaşar","Aliments",2],["çaydanlık","théière","À table",2],
+  ["tencere","casserole","À table",2],["tava","poêle","À table",2],
+  ["az önce","il y a un instant","Temps & calendrier",2],["birazdan","dans un moment","Temps & calendrier",2],
+  ["her gün","chaque jour","Temps & calendrier",1],["geçen hafta","la semaine dernière","Temps & calendrier",1],
+  ["gelecek hafta","la semaine prochaine","Temps & calendrier",1],["bu sabah","ce matin","Temps & calendrier",1],
+  ["şu an","en ce moment","Temps & calendrier",1],["geçen yıl","l'année dernière","Temps & calendrier",2],
+  ["kaç yaşındasın","quel âge as-tu","Questions",1],["saat kaçta","à quelle heure","Questions",1],
+  ["ne kadar sürer","combien de temps ça prend","Questions",2],["hangisi","lequel","Questions",2],
+  ["ışık","lumière","Maison & objets",1],["elektrik","électricité","Maison & objets",2],
+  ["çöp","poubelle / déchets","Maison & objets",2],["priz","prise","Maison & objets",2],
+  ["şarj","charge / chargeur","Maison & objets",1],["mesaj","message","Maison & objets",1],
+  ["internet","internet","Maison & objets",1],
+  ["galiba","probablement","Adverbes",2],["sanırım","je crois","Adverbes",1],
+  ["kesinlikle","absolument","Adverbes",1],["herhalde","sans doute","Adverbes",2],
+  ["mesela","par exemple","Mots-outils",1]
 ];
 
 /* dédup par terme turc (garde la 1re occurrence) */
@@ -618,8 +710,41 @@ const ITEMS=[]; {const seen=new Set(); let id=0;
 const CAT_ICON={"Politesse":"🤝","Phrases":"💬","Famille":"👪","À table":"🍽️","Aliments":"🍎","Sentiments":"😊",
   "Corps & santé":"🩺","Maison & objets":"🏠","Vêtements":"👕","Temps & calendrier":"📅","Météo":"🌤️",
   "Lieux & déplacements":"🧭","Argent & courses":"🛒","Nombres":"🔢","Questions":"❓","Verbes":"⚡",
-  "Mots-outils":"🔗","Adjectifs":"🎨","Adverbes":"⏱️","Animaux":"🐾"};
+  "Mots-outils":"🔗","Adjectifs":"🎨","Adverbes":"⏱️","Animaux":"🐾","Pronoms":"👤","Couleurs":"🌈"};
 const CATS=[]; {const s=new Set(); for(const it of ITEMS){ if(!s.has(it.cat)){s.add(it.cat);CATS.push(it.cat);} }}
+
+/* ---------- conjugaison (présent -iyor, passé -di, futur -ecek) ---------- */
+const CVv="aeıioöuü", CBACK="aıou", CVL="pçtkfsşh";
+const isCV=c=>CVv.includes(c);
+function cLastV(x){for(let i=x.length-1;i>=0;i--)if(isCV(x[i]))return x[i];return"e";}
+function H4(x){const v=cLastV(x);if("aı".includes(v))return"ı";if("ei".includes(v))return"i";if("ou".includes(v))return"u";return"ü";}
+function H2(x){return CBACK.includes(cLastV(x))?"a":"e";}
+function cStem(inf){return inf.replace(/(mek|mak)$/,"");}
+const IRR_PRES={git:"gid",et:"ed",tat:"tad"}, IRR_FULLPRES={ye:"yiyor",de:"diyor"}, IRR_FUT={git:"gid",et:"ed",tat:"tad",ye:"yi",de:"di"};
+function present3(inf){let st=cStem(inf);if(IRR_FULLPRES[st])return IRR_FULLPRES[st];if(IRR_PRES[st])st=IRR_PRES[st];
+  if(isCV(st[st.length-1])){const cut=st.slice(0,-1);return cut+H4(cut)+"yor";}return st+H4(st)+"yor";}
+function past3(inf){const st=cStem(inf),last=st[st.length-1];const d=isCV(last)?"d":(CVL.includes(last)?"t":"d");return st+d+H4(st);}
+function future3(inf){const st=cStem(inf),stem=IRR_FUT[st]||st,A=H2(st),suf=A==="a"?"acak":"ecek",buf=isCV(stem[stem.length-1])?"y":"";return stem+buf+suf;}
+function conjPresent(inf){const b=present3(inf);return{ben:b+"um",sen:b+"sun",o:b,biz:b+"uz",siz:b+"sunuz",onlar:b+"lar"};}
+function conjPast(inf){const st=cStem(inf),b=past3(inf),v=H4(st),A=H2(st);return{ben:b+"m",sen:b+"n",o:b,biz:b+"k",siz:b+"n"+v+"z",onlar:b+"l"+A+"r"};}
+function conjFuture(inf){const st=cStem(inf),b=future3(inf),A=H2(st),eV=(A==="a"?"ı":"i"),soft=b.replace(/k$/,"ğ");return{ben:soft+eV+"m",sen:b+"s"+eV+"n",o:b,biz:soft+eV+"z",siz:b+"s"+eV+"n"+eV+"z",onlar:b+"l"+A+"r"};}
+const CVERBS=[["olmak","être / devenir"],["gelmek","venir"],["gitmek","aller"],["yapmak","faire"],["etmek","faire (auxiliaire)"],["yemek","manger"],["içmek","boire"],["almak","prendre"],["vermek","donner"],["görmek","voir"],["bakmak","regarder"],["bilmek","savoir"],["istemek","vouloir"],["sevmek","aimer"],["konuşmak","parler"],["anlamak","comprendre"],["beklemek","attendre"],["okumak","lire"],["yazmak","écrire"],["oturmak","s'asseoir / habiter"],["uyumak","dormir"],["çalışmak","travailler"],["başlamak","commencer"],["sormak","demander"]];
+const CPRON=[["ben","je"],["sen","tu"],["o","il/elle"],["biz","nous"],["siz","vous"],["onlar","ils/elles"]];
+function renderConjList(){document.getElementById("conj-list").innerHTML=CVERBS.map(v=>
+  '<div class="gcard glass" onclick="openConj(\''+v[0]+'\')"><div class="gico" style="font-size:19px">🔤</div>'+
+  '<div><div class="gn">'+v[0]+'</div><div class="gs">'+v[1]+'</div></div>'+
+  '<span class="gchev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></div>').join('');}
+function cBlock(title,gloss,f){return '<div class="panel glass pad"><div class="panel-h"><span class="pt2">'+title+'</span></div>'+
+  '<div class="hint" style="text-align:left;margin:-2px 0 8px">'+gloss+'</div>'+
+  CPRON.map(pp=>'<div class="crow"><span class="cp">'+pp[0]+'<em>'+pp[1]+'</em></span><span class="cf">'+f[pp[0]]+'</span></div>').join('')+'</div>';}
+function openConj(inf){const v=CVERBS.find(x=>x[0]===inf);go("conjtable");
+  document.getElementById("conj-title").textContent=inf;
+  document.getElementById("conj-sub").textContent=v?v[1]:"";
+  document.getElementById("conj-body").innerHTML=
+    cBlock("Présent","« je fais / je suis en train de faire » — suffixe -iyor",conjPresent(inf))+
+    cBlock("Passé","« j\'ai fait » — suffixe -di",conjPast(inf))+
+    cBlock("Futur","« je ferai » — suffixe -ecek",conjFuture(inf));}
+function normTxt(x){return x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 
 /* ---------- état / stockage ---------- */
 const LS_KEY="turkce_app_v2"; /* progression rangée par mot turc: ajouter du vocab ne casse rien */
@@ -661,6 +786,7 @@ function go(v){
   if(v==="train") renderGameList();
   if(v==="revcats") renderCats();
   if(v==="save") refreshExport();
+  if(v==="conj") renderConjList();
   window.scrollTo(0,0);
 }
 
@@ -694,6 +820,17 @@ function renderDash(){
   const total=ITEMS.length, maxc=Math.max(1,...counts);
   document.getElementById("mastery").innerHTML=counts.map((c,i)=>
     '<div class="tile"><div class="tbar"><span style="height:'+Math.round(100*c/maxc)+'%"></span></div><div class="tn">'+c+'</div><div class="tl">boîte '+(i+1)+'</div></div>').join('');
+  renderLevel();
+}
+function renderLevel(){
+  const total=ITEMS.length; let seen=0,enCours=0,acquis=0,score=0;
+  ITEMS.forEach(it=>{const p=STATE.progress[it.tr]; if(!p)return; if(p.seen>0)seen++; if(p.box>=4)acquis++; else if(p.box>=2)enCours++; score+=(p.box-1);});
+  const maitrise=Math.round(100*score/(4*total));
+  let lab; if(acquis<30)lab="Tout début"; else if(acquis<100)lab="Débutant"; else if(acquis<250)lab="Élémentaire"; else if(acquis<450)lab="Intermédiaire"; else lab="Avancé (vocabulaire)";
+  document.getElementById("lvl-badge").textContent=lab;
+  document.getElementById("lvl-fill").style.width=maitrise+"%";
+  document.getElementById("lvl-counts").textContent=acquis+" mots acquis · "+enCours+" en cours · "+seen+"/"+total+" rencontrés";
+  document.getElementById("lvl-note").textContent="Maîtrise globale "+maitrise+"%. Ce niveau reflète seulement le vocabulaire connu dans l'appli (reconnaître et retrouver des mots) — pas la grammaire, la compréhension en situation, ni l'aisance à parler.";
 }
 document.getElementById("range-seg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b)return;
   document.querySelectorAll("#range-seg button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
@@ -716,6 +853,9 @@ function renderGameList(){
 
 /* ---------- revision ---------- */
 function renderCats(){
+  const sb=document.getElementById("rev-search"); if(sb)sb.value="";
+  const sr=document.getElementById("search-results"); if(sr)sr.innerHTML="";
+  document.getElementById("cat-grid").style.display="";
   document.getElementById("cat-grid").innerHTML=CATS.map(c=>{
     const n=ITEMS.filter(x=>x.cat===c).length;
     return '<div class="catcard glass" onclick="openRev(\''+c.replace(/'/g,"\\'")+'\')"><div class="catico">'+(CAT_ICON[c]||"📁")+'</div>'+
@@ -740,6 +880,16 @@ document.getElementById("rev-dir").addEventListener("click",e=>{ const b=e.targe
   document.querySelectorAll("#rev-dir button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
   REV_DIR=b.dataset.d; drawRevList(); });
 
+(function(){var sb=document.getElementById("rev-search"),sr=document.getElementById("search-results"),grid=document.getElementById("cat-grid"),cl=document.getElementById("rev-search-clear");
+  if(!sb)return;
+  function run(){var q=normTxt(sb.value.trim());
+    if(!q){grid.style.display="";sr.innerHTML="";return;}
+    grid.style.display="none";
+    var hits=ITEMS.filter(function(it){return normTxt(it.tr).includes(q)||normTxt(it.fr).includes(q);}).slice(0,60);
+    sr.innerHTML=hits.length?hits.map(function(it){return '<div class="wrow glass"><div class="a">'+it.tr+'</div><div class="b">'+it.fr+'</div></div>';}).join(''):'<div class="hint" style="margin-top:16px">Aucun mot trouvé.</div>';}
+  sb.addEventListener("input",run);
+  cl.addEventListener("click",function(){sb.value="";run();sb.focus();});
+})();
 /* ---------- game engine ---------- */
 let G=null;
 const body=document.getElementById("stage-body");
@@ -768,13 +918,16 @@ function nextQcm(){
   let others=shuffle(ITEMS.filter(x=>x.id!==it.id&&x.cat===it.cat)); if(others.length<3)others=others.concat(shuffle(ITEMS.filter(x=>x.id!==it.id)));
   const opts=shuffle([ans].concat(others.slice(0,3).map(x=>dir==="fr2tr"?x.tr:x.fr)));
   body.innerHTML='<div style="text-align:center"><span class="dir-pill '+(dir==="fr2tr"?"dir-fr":"dir-tr")+'">'+(dir==="fr2tr"?"français → turc":"turc → français")+'</span></div>'+
-    '<div class="prompt">'+q+'</div><div class="choices" id="ch"></div>';
-  const ch=document.getElementById("ch");
-  opts.forEach(o=>{ const b=document.createElement("button"); b.className="choice glass"; b.textContent=o;
-    b.onclick=()=>{ const ok=o===ans; Array.from(ch.children).forEach(c=>{ c.onclick=null;
-        if(c.textContent===ans)c.classList.add("correct"); else if(c===b)c.classList.add("wrong"); else c.classList.add("dim"); });
-      grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":ans); setTimeout(()=>{G.i++;nextQcm();},ok?650:1150); };
-    ch.appendChild(b); });
+    '<div class="prompt">'+q+'</div><div class="choices" id="ch"></div>'+
+    '<button class="btn btn-ghost" id="skip" style="margin-top:14px">Passer (je ne sais pas)</button>';
+  const ch=document.getElementById("ch"); let done=false;
+  function reveal(chosen){ if(done)return; done=true; const ok=chosen===ans;
+    Array.from(ch.children).forEach(c=>{ c.onclick=null;
+      if(c.textContent===ans)c.classList.add("correct"); else if(c.textContent===chosen)c.classList.add("wrong"); else c.classList.add("dim"); });
+    const sk=document.getElementById("skip"); if(sk)sk.disabled=true;
+    grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":ans); setTimeout(()=>{G.i++;nextQcm();},ok?1650:2150); }
+  opts.forEach(o=>{ const b=document.createElement("button"); b.className="choice glass"; b.textContent=o; b.onclick=()=>reveal(o); ch.appendChild(b); });
+  document.getElementById("skip").onclick=()=>reveal(null);
 }
 
 /* Cartes */
@@ -839,7 +992,7 @@ function nextListen(){
   opts.forEach(o=>{ const b=document.createElement("button"); b.className="choice glass"; b.textContent=o;
     b.onclick=()=>{ const ok=o===it.fr; Array.from(ch.children).forEach(c=>{c.onclick=null;
         if(c.textContent===it.fr)c.classList.add("correct"); else if(c===b)c.classList.add("wrong"); else c.classList.add("dim");});
-      grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":it.tr+" = "+it.fr); setTimeout(()=>{G.i++;nextListen();},ok?750:1250); };
+      grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":it.tr+" = "+it.fr); setTimeout(()=>{G.i++;nextListen();},ok?1750:2250); };
     ch.appendChild(b); });
 }
 
@@ -868,7 +1021,7 @@ function nextOrder(){
       refresh(); };
     pool.appendChild(el); });
   check.onclick=()=>{ const attempt=placed.map(e=>e.textContent).join(" ").toLocaleLowerCase("tr");
-    const ok=attempt===it.tr.toLocaleLowerCase("tr"); grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":it.tr); setTimeout(()=>{G.i++;nextOrder();},ok?800:1500); };
+    const ok=attempt===it.tr.toLocaleLowerCase("tr"); grade(it.tr,ok); if(ok)G.correct++; feedback(ok,ok?"":it.tr); setTimeout(()=>{G.i++;nextOrder();},ok?1800:2500); };
 }
 
 /* ---------- sauvegarde ---------- */

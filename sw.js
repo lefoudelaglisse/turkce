@@ -1,7 +1,7 @@
 /* Türkçe — service worker (hors-ligne + mises à jour fiables).
    À chaque nouvelle version de l'appli, incrémente le numéro CACHE
    (turkce-v2 -> turkce-v3 ...) pour nettoyer l'ancien cache. */
-const CACHE = "turkce-v2";
+const CACHE = "turkce-v3";
 const ASSETS = ["./", "./index.html", "./sw.js"];
 
 self.addEventListener("install", (e) => {
